@@ -20,9 +20,15 @@
 
 } */
 
-input[type='checkbox'] {
+/* input[type='checkbox'] {} */
+
+.check {
+    border: 1px solid yellow;
+    width: 2vw;
+    aspect-ratio: 1;
     margin-right: 15px;
 }
+
 
 .separator {
     width: 100%;
@@ -48,3 +54,10 @@ input[type='checkbox'] {
     border-radius: 18%;
     left: 10%;
 }
+
+/* .cxBox {
+    border: 1px solid yellow;
+    width: 2vw;
+    aspect-ratio: 1;
+    margin-right: 15px;
+} */
