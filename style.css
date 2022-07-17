@@ -2,13 +2,46 @@
     box-sizing: border-box;
 }
 
+.options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(43, 7, 68);
+}
+
+.beat-select {
+    display: flex;
+
+}
+
+.beat-option {
+    padding: 0.25rem;
+    border-radius: 50%;
+    width: 8rem;
+    height: 8rem;
+    background-color: blueviolet;
+    margin: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.beat-option:nth-child(5) {
+    font-size: 2.4rem;
+}
+
+
+
+
+
 .container {
-    padding: 15%;
+    padding: 12%;
     background-color: rgb(43, 7, 68);
 }
 
 .row {
-    padding-bottom: 5%;
+    padding-bottom: 2%;
     display: flex;
     justify-content: space-between;
     position: relative;
@@ -27,6 +60,7 @@
     width: 2vw;
     aspect-ratio: 1;
     margin-right: 15px;
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
 
@@ -61,3 +95,7 @@
     aspect-ratio: 1;
     margin-right: 15px;
 } */
+
+.hidden {
+    display: none;
+}
