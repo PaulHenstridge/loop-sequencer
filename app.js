@@ -1,14 +1,23 @@
 
-const container = document.querySelector('.container'),
-    options = document.querySelector('.options'),
-    beatOptions = document.querySelectorAll('.beat-option')
+const container = document.querySelector('.container')
+const options = document.querySelector('.options')
+
+const loopSelect = document.querySelector('.loop-select')
+const loopOptions = document.querySelectorAll('.loop-option')
+const octaveBlockOptions = document.querySelector('.block-menu')
+
+const octaveOptions = document.querySelectorAll('.octave-option')
+const keyOptions = document.querySelectorAll('.key-option')
+const synthOptions = document.querySelectorAll('.synth-option')
+
+const addBlock = document.querySelector('#add-block')
+const begin = document.querySelector('#go')
+
 
 let beatSteps = 16
 
-
 function getParams() {
-
-    for (let option of beatOptions) {
+    for (let option of loopOptions) {
         option.addEventListener('click', () => {
             let selection = parseInt(option.innerText)
             if (isNaN(selection)) {
@@ -18,47 +27,85 @@ function getParams() {
             }
 
             setTimeout(() => {
-                for (option of beatOptions) option.style.opacity = '0'
-            }, 500)
+                loopSelect.style.top = '-12rem'
+            }, 400)
+            setTimeout(() => {
+                octaveBlockOptions.style.top = '0'
+            }, 700)
         })
     }
-    // container.classList.add('hidden')
+
+    let paramsObj = {}
+
+    // TODO - duplication below - create one function, pass each group in as arg
+    for (let option of octaveOptions) {
+        option.addEventListener('click', () => {
+            // remove .selected from all then apply to chosen one
+            for (let option of octaveOptions) option.classList.remove('selected')
+            option.classList.add('selected')
+
+            let selection = parseInt(option.innerText)
+            // add octave option to params object
+            paramsObj.octave = selection
+        })
+    }
+    for (let option of keyOptions) {
+        option.addEventListener('click', () => {
+            for (let option of keyOptions) option.classList.remove('selected')
+            option.classList.add('selected')
+
+            let selection = option.innerText
+            // add key option to params object
+            paramsObj.key = selection
+        })
+    }
+    for (let option of synthOptions) {
+        option.addEventListener('click', () => {
+            for (let option of synthOptions) option.classList.remove('selected')
+            option.classList.add('selected')
+
+            let selection = option.innerText
+            // add synth option to params object
+            paramsObj.synth = selection
+            console.log(paramsObj)
+
+        })
+    }
+
+    // use params obj to call populateArrays() inside getParams
+    // then call setup() within populateArrays()
+    //function populateArrays(scale, octave, sawtooth = false, sine = false, membrane = false) {
+    addBlock.addEventListener('click', () => {
+        populateArrays(
+            paramsObj.key === 'Major' ? CmajorScale : CminorScale,
+            paramsObj.octave,
+            paramsObj.synth === 'Sawtooth' ? true : false,
+            paramsObj.synth === 'Sine' ? true : false,
+            paramsObj.synth === 'Membrane' ? true : false
+        )
+    })
+
+    begin.addEventListener('click', () => {
+        options.classList.add('hidden')
+        container.classList.remove('hidden')
+        setup(notes)
+    })
 
 }
 
 getParams()
-// this is number of berats before it loops, also number of steps in the tone repeat, same same...
-
 
 const notes = []
-//     'G6', 'F6', 'E6', 'D6', 'C6', 'B5', 'A5',
-//     'G4', 'F4', 'E4', 'D4', 'C4', 'B3', 'A3',
-//     'G3', 'F3', 'E3', 'D3', 'C3', 'B2', 'A2',
-//     'G5', 'F4', 'E4', 'D2', 'C2', 'B1', 'A1'
-// ]
 
 const CmajorScale = ['C', 'D', 'E', 'F', 'G', 'A', 'B'].reverse()
 const CminorScale = ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb'].reverse()
 
 // create inputs to choose scale and num of octaves
-// get rid of synth choice shite below
-// long term add options for synth choice
 
 let lowerOctave,
     upperOctave
 
-
-/*
-options:   default - full 7 octaves major, default synth
-
-       custom - choose options for each octave block and add individually
-
-*/
-
-// choose major or minor for each octave
-// and ability to repeat, customise...
-
-// if octave is in minor key, style differently, e.g blue v yellow..?
+// TODO - if octave is in minor key, style differently, e.g blue v yellow..?
 
 let sawtoothIdxs = []
 let sineIdxs = []
@@ -84,42 +131,31 @@ function populateArrays(scale, octave, sawtooth = false, sine = false, membrane 
     scale.forEach(note => {
         notes.push(`${note}${octave}`) // maybe need to unshift rather than push?
     })
-
 }
 
-
-
+// TODO - show where on the loop is active
 // check div can show time in the loop (e.g a background on each active one, making a sort ogf column?)
-
 // use Tone.js time/ trasport...  to manipulate DOM elements   ??
 
 /*
-
-    req inputs : octaves array
+    req inputs: key 
+                octave
                 sawtooth/sine bool
-                index where saw/sine begins true   (casn i get that from notes.length??)
-    options: major or minor
-            select octaves
-            add drums  - add as synth type?
-
-    keep below but use settings to create notes[]
-    make noteRows = notes.length
-    make beats and steps in repreat func a variable
+                index where saw/sine begins true   
 */
 
-
-// CREATE HTML AND ADD LISTENERS
+// ****SETUP*****  HTML AND ADD LISTENERS
 
 function setup(notesArray, noteRows = notes.length, beats = beatSteps) {
 
-    // info labels - if i%7 === 0, check for i in type arrays, return an element showing synth type
+    // TODO info labels - if i%7 === 0, check for i in type arrays, return an element showing synth type
     for (let i = 0; i < noteRows; i++) {
         let noteRow = document.createElement('div')
         noteRow.classList.add('row')
 
         let infoBox = document.createElement('div')
         infoBox.classList.add('info-box')
-        infoBox.innerText = notesArray[i]
+        infoBox.innerHTML = ` <span>${notesArray[i]}<span/> `
 
 
         for (let j = 0; j < beats; j++) {
@@ -150,12 +186,12 @@ function setup(notesArray, noteRows = notes.length, beats = beatSteps) {
 
 //  FUNCTION CALLS  ####################################
 
-populateArrays(CmajorScale, 4)
-populateArrays(CmajorScale, 4, true)
-populateArrays(CmajorScale, 4, false, true)
-populateArrays(CmajorScale, 3, false, false, true)
-populateArrays(CmajorScale, 2, false, true, true)
-setup(notes)
+// populateArrays(CmajorScale, 4)
+// populateArrays(CmajorScale, 4, true)
+// populateArrays(CmajorScale, 4, false, true)
+// populateArrays(CmajorScale, 3, false, false, true)
+// populateArrays(CmajorScale, 2, false, true, true)
+// setup(notes)
 
 // #####################################################
 
@@ -181,33 +217,9 @@ for (let i = 0; i < rows.length; i++) {
     if (sawtoothIdxs.includes(i)) synth.oscillator.type = 'sawtooth'
     if (sineIdxs.includes(i)) synth.oscillator.type = 'sine'
 
-
-
-
-    // let synth = i < rows.length - 7 ? new Tone.Synth() : new Tone.MembraneSynth()
-
-
-    // switch (true) {
-    //     case i < 7:
-    //         synth.oscillator.type = 'triangle'
-    //         break
-    //     case i < 14:
-    //         synth.oscillator.type = 'sine'
-    //         break
-    //     case i < 21:
-    //         synth.oscillator.type = 'sawtooth'
-    //         break
-
-    // }
-
     synths.push(synth)
 }
 
-
-
-// synths[0].oscillator.type = 'triangle'
-// synths[1].oscillator.type = 'sine'
-// synths[2].oscillator.type = 'sawtooth'
 
 const gain = new Tone.Gain(0.6);
 gain.toDestination();

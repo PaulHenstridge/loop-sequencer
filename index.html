@@ -11,6 +11,9 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@1,900&display=swap" rel="stylesheet">
     <title>Document</title>
 </head>
 <!-- create below from js, user selects number of rows -->
@@ -18,32 +21,68 @@
 <body>
 
     <section class="options">
-        <h2>Please select number of bars to loop</h2>
-        <div class="beat-select">
-            <div class="beat-option">4</div>
-            <div class="beat-option">8</div>
-            <div class="beat-option">16</div>
-            <div class="beat-option">32</div>
-            <div class="beat-option">custom</div>
+        <div class="loop-select">
+            <div class="loop-option">4<span>bars</span> </div>
+            <div class="loop-option">8<span>bars</span></div>
+            <div class="loop-option">16<span>bars</span></div>
+            <div class="loop-option">custom</div>
         </div>
 
-        <!-- <h2>Options</h2>
-        <label for="tempo">Tempo</label>
-        <input type="range" name="tempo" id="tempo" min="20" max="240" value="130">
+        <div class="block-menu">
+            <div class="octave-select">
+                <h3>Select Octave</h3>
+                <div class="octave-ops-container">
+                    <div class="octave-option">1</div>
+                    <div class="octave-option">2</div>
+                    <div class="octave-option">3</div>
+                    <div class="octave-option">4</div>
+                    <div class="octave-option">5</div>
+                    <div class="octave-option">6</div>
+                    <div class="octave-option">7</div>
+                </div>
 
-        <div class="barcount-selector">
-            <h4>Duration of Loop</h4>
-            <label for="4">4 Bars</label>
-            <input type="radio" id="4" name="no-of-bars" value="4">
-            <label for="8">8 Bars</label>
-            <input type="radio" id="8" name="no-of-bars" value="8" checked>
-            <label for="16">16 bars</label>
-            <input type="radio" id="16" name="no-of-bars" value="16">
-        </div> -->
+
+            </div>
+
+            <div class="key-select">
+                <h3>Select Key</h3>
+                <div class="key-ops-container">
+                    <div class="key-option">Major</div>
+                    <div class="key-option">Minor</div>
+                </div>
+
+            </div>
+
+            <div class="synth-select">
+                <h3>Select Synth Type</h3>
+                <div class="synth-ops-container">
+                    <div class="synth-option">Triangle</div>
+                    <div class="synth-option">Sine</div>
+                    <div class="synth-option">Sawtooth</div>
+                    <div class="synth-option">Membrane</div>
+                </div>
+
+            </div>
+
+            <div class="buttons-container">
+                <button id="add-block">Add Octave Block</button>
+                <button id="go"><strong>Begin Session</strong></button>
+            </div>
+
+        </div>
+
+
+
+        <!-- <div class="tempo-options">
+            <label for="tempo">Tempo</label>
+            <input type="range" name="tempo" id="tempo" min="20" max="240" value="130">
+        </div>
+       -->
+
 
     </section>
 
-    <div class="container">
+    <div class="container hidden">
         <button id="start">START</button>
 
     </div>
