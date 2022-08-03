@@ -4,14 +4,16 @@ const options = document.querySelector('.options')
 
 const loopSelect = document.querySelector('.loop-select')
 const loopOptions = document.querySelectorAll('.loop-option')
-const octaveBlockOptions = document.querySelector('.block-menu')
 
+const octaveBlockOptions = document.querySelector('.block-menu')
 const octaveOptions = document.querySelectorAll('.octave-option')
 const keyOptions = document.querySelectorAll('.key-option')
 const synthOptions = document.querySelectorAll('.synth-option')
 
 const addBlock = document.querySelector('#add-block')
 const begin = document.querySelector('#go')
+
+const inPlayOptions = document.querySelector('.in-play-options')
 
 
 let beatSteps = 16
@@ -21,7 +23,7 @@ function getParams() {
         option.addEventListener('click', () => {
             let selection = parseInt(option.innerText)
             if (isNaN(selection)) {
-                //reveal an input and use its submitted value
+                // -TODO- reveal an input and use its submitted value
             } else {
                 beatSteps = selection
             }
@@ -73,9 +75,18 @@ function getParams() {
     }
 
     // use params obj to call populateArrays() inside getParams
-    // then call setup() within populateArrays()
-    //function populateArrays(scale, octave, sawtooth = false, sine = false, membrane = false) {
+
     addBlock.addEventListener('click', () => {
+
+        addBlock.classList.add('selected')
+
+        setTimeout(() => {
+            addBlock.classList.remove('selected')
+            for (let option of octaveOptions) option.classList.remove('selected')
+            for (let option of keyOptions) option.classList.remove('selected')
+            for (let option of synthOptions) option.classList.remove('selected')
+        }, 500)
+
         populateArrays(
             paramsObj.key === 'Major' ? CmajorScale : CminorScale,
             paramsObj.octave,
@@ -88,6 +99,7 @@ function getParams() {
     begin.addEventListener('click', () => {
         options.classList.add('hidden')
         container.classList.remove('hidden')
+        inPlayOptions.classList.remove('hidden')
         setup(notes)
     })
 
@@ -100,10 +112,6 @@ const notes = []
 const CmajorScale = ['C', 'D', 'E', 'F', 'G', 'A', 'B'].reverse()
 const CminorScale = ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb'].reverse()
 
-// create inputs to choose scale and num of octaves
-
-let lowerOctave,
-    upperOctave
 
 // TODO - if octave is in minor key, style differently, e.g blue v yellow..?
 
@@ -150,13 +158,24 @@ function setup(notesArray, noteRows = notes.length, beats = beatSteps) {
 
     // TODO info labels - if i%7 === 0, check for i in type arrays, return an element showing synth type
     for (let i = 0; i < noteRows; i++) {
+        if (i % 7 === 0) {
+            let synthLabel = document.createElement('div')
+            synthLabel.classList.add('synth-label')
+            synthLabel.innerText = membraneIdxs.includes(i) ? 'membrane' : sineIdxs.includes(i) ? 'Sine' : sawtoothIdxs.includes(i) ? 'sawtooth' : 'triangle'
+            container.appendChild(synthLabel)
+        }
         let noteRow = document.createElement('div')
         noteRow.classList.add('row')
 
-        let infoBox = document.createElement('div')
+        let infoBox = document.createElement('span')
         infoBox.classList.add('info-box')
         infoBox.innerHTML = ` <span>${notesArray[i]}<span/> `
 
+        /*
+         !!!  URGENT TODO !!!  infobox cant be inside noteRow cos it messes up the loop.
+         position infoBox correctly.
+         Maybe make 1st check relative and position it left of it, without being inside row?
+        */
 
         for (let j = 0; j < beats; j++) {
             let check = document.createElement('div')
@@ -172,6 +191,7 @@ function setup(notesArray, noteRows = notes.length, beats = beatSteps) {
                 check.style.marginRight = '3vw'
             }
             noteRow.appendChild(check)
+            // if (!j) noteRow.insertBefore(infoBox, check)
         }
 
         container.appendChild(noteRow)
@@ -182,6 +202,7 @@ function setup(notesArray, noteRows = notes.length, beats = beatSteps) {
             container.appendChild(separator)
         }
     }
+    makeSound()
 }
 
 //  FUNCTION CALLS  ####################################
@@ -195,67 +216,66 @@ function setup(notesArray, noteRows = notes.length, beats = beatSteps) {
 
 // #####################################################
 
-
-const rows = document.querySelectorAll('.row')
-const startBtn = document.querySelector('#start')
-let index = 0
-let synths = []
-const tempoSlider = document.querySelector('#tempo')
-
-// when to run this? page reload needed?
-// const loopDuration = document.querySelector('input[name="no-of-bars"]:checked').value;
-
-// tempoSlider.addEventListener('change', () => {
-//     let tempo = tempoSlider.value
-//     Tone.Transport.bpm.value = tempo
-// })
-
-//  CREATE SYNTHS
-for (let i = 0; i < rows.length; i++) {
-    let synth = membraneIdxs.includes(i) ? new Tone.MembraneSynth() : new Tone.Synth()
-    // if i is in either synthType array, run func to count 7 on and make all that type
-    if (sawtoothIdxs.includes(i)) synth.oscillator.type = 'sawtooth'
-    if (sineIdxs.includes(i)) synth.oscillator.type = 'sine'
-
-    synths.push(synth)
-}
+function makeSound() {
+    const rows = document.querySelectorAll('.row')
+    const startBtn = document.querySelector('#start')
+    let index = 0
+    let synths = []
+    const tempoSlider = document.querySelector('#tempo')
 
 
-const gain = new Tone.Gain(0.6);
-gain.toDestination();
+    tempoSlider.addEventListener('change', () => {
+        let tempo = tempoSlider.value
+        Tone.Transport.bpm.value = tempo
+    })
 
-synths.forEach(synth => synth.connect(gain));
-
-Tone.Transport.scheduleRepeat(repeat, '8n');
-
-Tone.Transport.start();
-
-
-function repeat(time) {
-    let step = index % beatSteps;// <- needs to be numOfBeats - make variable
+    //  CREATE SYNTHS
     for (let i = 0; i < rows.length; i++) {
-        let synth = synths[i],
-            note = notes[i],
-            row = rows[i],
-            input = row.querySelector(`div:nth-child(${step + 1})`);
-        if (input.dataset.status !== 'off') synth.triggerAttackRelease(note, '8n', time);
+        let synth = membraneIdxs.includes(i) ? new Tone.MembraneSynth() : new Tone.Synth()
+        // if i is in either synthType array, run func to count 7 on and make all that type
+        if (sawtoothIdxs.includes(i)) synth.oscillator.type = 'sawtooth'
+        if (sineIdxs.includes(i)) synth.oscillator.type = 'sine'
+
+        synths.push(synth)
     }
-    index++;
+
+
+    const gain = new Tone.Gain(0.6);
+    gain.toDestination();
+
+    synths.forEach(synth => synth.connect(gain));
+
+    Tone.Transport.scheduleRepeat(repeat, '8n');
+
+    Tone.Transport.start();
+
+
+    function repeat(time) {
+        let step = index % beatSteps;// <- needs to be numOfBeats - make variable
+        for (let i = 0; i < rows.length; i++) {
+            let synth = synths[i],
+                note = notes[i],
+                row = rows[i],
+                input = row.querySelector(`div:nth-child(${step + 1})`);
+            if (input.dataset.status !== 'off') synth.triggerAttackRelease(note, '8n', time);
+        }
+        index++;
+    }
+
+    startBtn.addEventListener('click', async () => {
+        if (Tone.Transport.state !== 'started') {
+            startBtn.innerText = 'STOP'
+            Tone.Transport.start();
+            await Tone.start();
+            console.log(Tone.Transport.state)
+
+
+        } else {
+            startBtn.innerText = 'START'
+            Tone.Transport.stop();
+        }
+    })
 }
-
-console.log(Tone.Transport.state)
-startBtn.addEventListener('click', async () => {
-    if (Tone.Transport.state !== 'started') {
-        startBtn.innerText = 'STOP'
-        Tone.Transport.start();
-        await Tone.start();
-
-    } else {
-        startBtn.innerText = 'START'
-        Tone.Transport.stop();
-    }
-})
-
 /*
 this prob makes sense as a react app.
 I want each set of (7) rows/notes/sounds to be independent component
@@ -267,8 +287,13 @@ would also take other 'global' variables e.g tempo.
 
 function saveChoon() {
     // for aach check in each row, if data is yes record it in saved array
-    // make an object (in book)
+    // make an object (see book)
     // save to local storage  ==> to DB
+
+    // TODO - need the arrays created in createArays(), and arrays reprersenting each noteRow ['on', 'off', 'off' ...]
+    //  save this to DB/ local storage
+
+    // make a function to recreate the setup with that data
 
 }
 
